@@ -1,269 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Santa Puzzle Quest 🎅✨</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+<meta charset="UTF-8">
+<title>Santa’s Workshop Helper Quest 🎅✨</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
     body {
-        margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        background: #0a0d2c;
-        color: #fff;
+        background: #021027;
+        color: white;
+        font-family: 'Arial Rounded MT Bold', sans-serif;
         text-align: center;
-    }
-    .screen {
-        display: none;
         padding: 20px;
     }
-    .active { display: block; }
-
-    button {
-        background: #ffcf4d;
-        color: #4a2c00;
-        padding: 10px 20px;
-        border-radius: 14px;
-        border: none;
-        font-weight: bold;
-        cursor: pointer;
-        margin-top: 20px;
-        font-size: 1rem;
+    .card {
+        background: rgba(255,255,255,0.1);
+        padding: 20px;
+        border-radius: 15px;
+        max-width: 480px;
+        margin: auto;
+        box-shadow: 0 0 20px rgba(255,255,255,0.15);
     }
+    button {
+        background: #FFD54F;
+        color: #000;
+        padding: 12px 25px;
+        font-size: 18px;
+        border: none;
+        border-radius: 10px;
+        margin-top: 15px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    button:hover { background: #ffcc2b; }
+    .hidden { display: none; }
+    .emoji-big { font-size: 60px; }
+    .emoji-mid { font-size: 45px; }
     input {
+        padding: 12px;
         width: 80%;
-        max-width: 300px;
-        padding: 10px;
-        margin: 6px 0;
+        font-size: 18px;
         border-radius: 10px;
         border: none;
-        font-size: 1rem;
-    }
-
-    .clue-box {
-        background: #14204d;
-        padding: 18px;
-        border-radius: 14px;
-        margin: 20px auto;
-        width: 90%;
-        max-width: 380px;
-        font-size: 1.1rem;
-        line-height: 1.5rem;
-    }
-
-    #buddy {
-        font-size: 3rem;
-        margin-bottom: 10px;
-    }
-
-    #message {
-        margin-top: 10px;
-        font-size: 1rem;
-        min-height: 2rem;
+        margin-top: 15px;
     }
 </style>
 </head>
-
 <body>
 
-<!-- ⭐ SCENE 0 — Intro -->
-<div id="scene0" class="screen active">
-    <h1>🎅 Santa Is Missing!!</h1>
-
-    <p style="font-size:1.1rem; line-height:1.5rem;">
-        Oh no! Santa went to check on his reindeer, slipped on a candy cane,  
-        and *POOF!* — vanished into Christmas air! 😱  
-        The elves searched high and low, but still… **NO SANTA!**  
-        We need YOU, the brave Christmas Detective,  
-        to solve clues and bring Santa home! 🎄🕵️‍♂️
-    </p>
-
-    <button onclick="goToSetup()">Begin the Quest</button>
-</div>
-
-<!-- ⭐ SETUP SCREEN -->
-<div id="setup" class="screen">
-    <h2>🎄 Grown-ups: Enter 4 Places</h2>
-    <p>Examples: Kitchen, Backyard, Living Room, Grandma’s House</p>
-
-    <input id="city" placeholder="City or Town (optional)" /><br>
-    <input id="loc1" placeholder="Location 1" /><br>
-    <input id="loc2" placeholder="Location 2" /><br>
-    <input id="loc3" placeholder="Location 3" /><br>
-    <input id="loc4" placeholder="Location 4" /><br>
-
-    <button onclick="startGame()">Start Puzzle Adventure</button>
-</div>
-
-<!-- ⭐ GAME SCENE -->
-<div id="game" class="screen">
-    <div id="buddy">🧝‍♂️</div>
-    <h2 id="sceneTitle"></h2>
-
-    <div class="clue-box" id="clueText"></div>
-
-    <input id="answerBox" placeholder="Type your answer…" />
-    <button onclick="submitAnswer()">Submit</button>
-
-    <div id="message"></div>
-
-    <button id="nextBtn" style="display:none;" onclick="nextScene()">Next Scene</button>
-</div>
-
-<!-- ⭐ FINAL SCENE -->
-<div id="final" class="screen">
-    <h1>🎅✨ You Found Santa!</h1>
-
-    <p style="font-size:1.1rem; line-height:1.5rem;">
-        Santa saw your clever clues and jumped with joy!  
-        He and Buddy are now heading back to the North Pole —  
-        and they want to say **THANK YOU** for saving Christmas! 🎄❤️  
-    </p>
-
-    <p style="font-size:3rem;">👋🎅</p>
-
-    <button onclick="restart()">Play Again</button>
-</div>
+<div id="game"></div>
 
 <script>
-/* -------------------
-   STATE MANAGEMENT
--------------------- */
-let currentScene = 1;
-let locations = [];
-let cityName = "";
-let correctAnswers = [];
-let hintTimer = null;
+let scene = 0;
 
-/* -------------------
-   RHYMING CLUE BUILDER
--------------------- */
-function buildClue(location) {
-    return (
-        `Buddy found a clue, oh what a sight!<br>` +
-        `It softly glows in the Christmas night.<br><br>` +
-        `It reads:<br>` +
-        `“I’m hiding near the **${location}**, you see…<br>` +
-        `Guess the place and come find me!”`
-    );
-}
+const game = document.getElementById("game");
 
-/* -------------------
-   DEFAULT LOCATIONS
--------------------- */
-function fillDefaultLocations() {
-    return [
-        "Kitchen",
-        "Backyard",
-        "Living Room",
-        "Front Porch"
-    ];
-}
+const screens = [
 
-/* -------------------
-   SCENE SWITCHING
--------------------- */
-function show(screenId) {
-    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-    document.getElementById(screenId).classList.add("active");
-}
+/* 🎅 SCENE 0 — INTRO */
+`
+<div class="card">
+<div class="emoji-big">🎅🧝‍♂️✨</div>
+<h1>Santa Is Missing From His Workshop!</h1>
+<p>Oh no! Buddy the Elf needs your help! Santa wandered off while checking toys, and we must find him before Christmas Eve! 🎄</p>
+<button onclick="nextScene()">Start the Quest ➡️</button>
+</div>
+`,
 
-function goToSetup() { show("setup"); }
+/* 🎁 SCENE 1 — PUZZLE 1 */
+`
+<div class="card">
+<div class="emoji-big">🧝‍♂️</div>
+<h2>Buddy Needs Your Help!</h2>
+<p>“Quick helper! Which gift is <b>round</b> like a snowball?”</p>
+<button onclick="checkAnswer(1)">🎁 Square Present</button><br>
+<button onclick="checkAnswer(2)">⚽ Round Ball</button><br>
+<button onclick="checkAnswer(3)">📘 Book</button>
+<p id="msg1"></p>
+</div>
+`,
 
-/* -------------------
-   START GAME
--------------------- */
-function startGame() {
-    cityName = document.getElementById("city").value.trim();
+/* 🛷 SCENE 2 — PUZZLE 2 */
+`
+<div class="card">
+<div class="emoji-big">🦌</div>
+<h2>Rudolph Has a Clue!</h2>
+<p>“Which one of my friends wears a <b>red nose</b> like me?”</p>
+<button onclick="checkAnswer(4)">🦌 Dasher</button><br>
+<button onclick="checkAnswer(5)">🦌 Blitzen</button><br>
+<button onclick="checkAnswer(6)">🦌 Rudolph</button>
+<p id="msg2"></p>
+</div>
+`,
 
-    const l1 = document.getElementById("loc1").value.trim();
-    const l2 = document.getElementById("loc2").value.trim();
-    const l3 = document.getElementById("loc3").value.trim();
-    const l4 = document.getElementById("loc4").value.trim();
+/* 🍪 SCENE 3 — PUZZLE 3 */
+`
+<div class="card">
+<div class="emoji-big">🍪🥛</div>
+<h2>Santa Left Snacks!</h2>
+<p>“Which treat does Santa love the MOST?”</p>
+<button onclick="checkAnswer(7)">🥕 Carrot</button><br>
+<button onclick="checkAnswer(8)">🍎 Apple</button><br>
+<button onclick="checkAnswer(9)">🍪 Cookie</button>
+<p id="msg3"></p>
+</div>
+`,
 
-    locations = [l1, l2, l3, l4];
+/* 🎉 SCENE 4 — ENDING */
+`
+<div class="card">
+<div class="emoji-big">🎅❤️✨</div>
+<h2>You Found Santa!</h2>
+<p>“Ho ho ho! Thank you, little helper! Buddy and I couldn’t have done it without you!”</p>
+<p>🎄 You saved Christmas! 🎄</p>
+<button onclick="restart()">Play Again 🎁</button>
+</div>
+`
 
-    // fill blanks with defaults
-    const defaults = fillDefaultLocations();
-    for (let i = 0; i < 4; i++) {
-        if (!locations[i]) locations[i] = defaults[i];
-    }
+];
 
-    correctAnswers = locations.map(l => l.toLowerCase());
-
-    currentScene = 1;
-    loadScene();
-    show("game");
-}
-
-/* -------------------
-   LOAD A SCENE
--------------------- */
-function loadScene() {
-    if (currentScene > 4) {
-        show("final");
-        return;
-    }
-
-    const loc = locations[currentScene - 1];
-
-    document.getElementById("sceneTitle").innerHTML =
-        `Scene ${currentScene} — Searching in ${cityName || "your town"}!`;
-
-    document.getElementById("clueText").innerHTML = buildClue(loc);
-
-    document.getElementById("message").innerHTML = "";
-    document.getElementById("answerBox").value = "";
-    document.getElementById("nextBtn").style.display = "none";
-
-    startHintTimer(loc);
-}
-
-/* -------------------
-   HINT TIMER (5 minutes)
--------------------- */
-function startHintTimer(location) {
-    if (hintTimer) clearTimeout(hintTimer);
-
-    hintTimer = setTimeout(() => {
-        document.getElementById("message").innerHTML =
-            `🧝‍♂️ Buddy Hint: “Think carefully… where might Santa rest?<br>` +
-            `Try looking near the <b>${location}</b>!”`;
-    }, 5 * 60 * 1000); // 5 minutes
-}
-
-/* -------------------
-   SUBMIT ANSWER
--------------------- */
-function submitAnswer() {
-    const user = document.getElementById("answerBox").value.trim().toLowerCase();
-    const correct = correctAnswers[currentScene - 1];
-
-    if (user === correct) {
-        document.getElementById("message").innerHTML =
-            `🎉 Correct! Santa WAS hiding near the <b>${locations[currentScene - 1]}</b>!`;
-        document.getElementById("nextBtn").style.display = "inline-block";
-        clearTimeout(hintTimer);
-    } else {
-        document.getElementById("message").innerHTML =
-            `❌ Not quite! Try again, detective!`;
-    }
-}
-
-/* -------------------
-   NEXT SCENE
--------------------- */
 function nextScene() {
-    currentScene++;
-    loadScene();
+    scene++;
+    game.innerHTML = screens[scene];
 }
 
-/* -------------------
-   RESTART
--------------------- */
 function restart() {
-    show("scene0");
+    scene = 0;
+    game.innerHTML = screens[0];
 }
+
+function checkAnswer(btn) {
+    const correctAnswers = {
+        1: false, 2: true, 3: false,   // Scene 1 correct = 2
+        4: false, 5: false, 6: true,   // Scene 2 correct = 6
+        7: false, 8: false, 9: true    // Scene 3 correct = 9
+    };
+
+    const sceneMsg = {
+        1: "msg1",
+        2: "msg2",
+        3: "msg3"
+    };
+
+    let msg = document.getElementById(sceneMsg[scene]);
+
+    if (correctAnswers[btn]) {
+        msg.innerHTML = "<br>🎉 Correct!!";
+        setTimeout(() => nextScene(), 800);
+    } else {
+        msg.innerHTML = "<br>❌ Try again, helper!";
+    }
+}
+
+game.innerHTML = screens[0];
 </script>
 
 </body>
