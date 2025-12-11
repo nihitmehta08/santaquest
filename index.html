@@ -1,545 +1,270 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Santa’s 5-Stop Quest 🎅✨</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<meta charset="UTF-8" />
+<title>Santa Puzzle Quest 🎅✨</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #0b2346, #020814);
-      color: #fefefe;
-      min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 20px 10px 40px;
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #0a0d2c;
+        color: #fff;
+        text-align: center;
     }
-    h1 {
-      text-align: center;
-      font-size: clamp(1.8rem, 3vw, 2.4rem);
-      margin-bottom: 0.5rem;
+    .screen {
+        display: none;
+        padding: 20px;
     }
-    h1 span {
-      font-size: 1.3em;
-    }
-    .app-shell {
-      width: 100%;
-      max-width: 950px;
-      background: rgba(3, 14, 35, 0.94);
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 18px 18px 22px;
-      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.7);
-    }
-    .subtitle {
-      text-align: center;
-      font-size: 0.95rem;
-      opacity: 0.9;
-      margin-bottom: 1rem;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
-      gap: 18px;
-    }
-    @media (max-width: 800px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-    .card {
-      background: rgba(6, 22, 56, 0.9);
-      border-radius: 16px;
-      padding: 14px 14px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-    .card h2 {
-      font-size: 1.1rem;
-      margin-bottom: 0.4rem;
-    }
-    label {
-      font-size: 0.9rem;
-      display: block;
-      margin-top: 6px;
-      margin-bottom: 3px;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 6px 8px;
-      margin-bottom: 4px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(1, 7, 20, 0.9);
-      color: #fefefe;
-      font-size: 0.9rem;
-    }
-    input[type="text"]::placeholder {
-      color: rgba(255,255,255,0.4);
-    }
-    .hint {
-      font-size: 0.8rem;
-      opacity: 0.85;
-      margin-top: 4px;
-    }
+    .active { display: block; }
+
     button {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+        background: #ffcf4d;
+        color: #4a2c00;
+        padding: 10px 20px;
+        border-radius: 14px;
+        border: none;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+        font-size: 1rem;
     }
-    button.primary {
-      background: linear-gradient(135deg, #ffc94d, #ff9b26);
-      color: #2b1400;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
+    input {
+        width: 80%;
+        max-width: 300px;
+        padding: 10px;
+        margin: 6px 0;
+        border-radius: 10px;
+        border: none;
+        font-size: 1rem;
     }
-    button.secondary {
-      background: rgba(255,255,255,0.08);
-      color: #fefefe;
+
+    .clue-box {
+        background: #14204d;
+        padding: 18px;
+        border-radius: 14px;
+        margin: 20px auto;
+        width: 90%;
+        max-width: 380px;
+        font-size: 1.1rem;
+        line-height: 1.5rem;
     }
-    button:active {
-      transform: translateY(1px) scale(0.99);
-      box-shadow: 0 3px 7px rgba(0,0,0,0.7);
+
+    #buddy {
+        font-size: 3rem;
+        margin-bottom: 10px;
     }
-    .button-row {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .scene-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      font-size: 0.9rem;
-    }
-    .scene-badge {
-      background: rgba(22, 108, 255, 0.22);
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .scene-badge span {
-      color: #ffd75a;
-      font-weight: 600;
-    }
-    #sceneDescription {
-      font-size: 0.9rem;
-      margin-bottom: 6px;
-      min-height: 2.2em;
-    }
-    #taskText {
-      font-size: 0.9rem;
-      margin-bottom: 6px;
-      color: #ffd75a;
-      min-height: 1.6em;
-    }
+
     #message {
-      font-size: 0.9rem;
-      margin-top: 6px;
-      min-height: 1.6em;
+        margin-top: 10px;
+        font-size: 1rem;
+        min-height: 2rem;
     }
-    #message.good {
-      color: #7dfaa2;
-    }
-    #message.hint {
-      color: #ffd75a;
-    }
-    #gameCanvas {
-      width: 100%;
-      max-width: 100%;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: #020712;
-      cursor: crosshair;
-      margin-top: 6px;
-    }
-    .footer-note {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      opacity: 0.8;
-      text-align: center;
-    }
-  </style>
+</style>
 </head>
+
 <body>
-  <div class="app-shell">
-    <h1>Santa’s 5-Stop Quest <span>🎅🕵️‍♀️</span></h1>
-    <p class="subtitle">
-      Parents enter 4 places. Kids tap to find Santa in each scene. On the 5th stop, Santa flies across the night sky!
+
+<!-- ⭐ SCENE 0 — Intro -->
+<div id="scene0" class="screen active">
+    <h1>🎅 Santa Is Missing!!</h1>
+
+    <p style="font-size:1.1rem; line-height:1.5rem;">
+        Oh no! Santa went to check on his reindeer, slipped on a candy cane,  
+        and *POOF!* — vanished into Christmas air! 😱  
+        The elves searched high and low, but still… **NO SANTA!**  
+        We need YOU, the brave Christmas Detective,  
+        to solve clues and bring Santa home! 🎄🕵️‍♂️
     </p>
 
-    <div class="grid">
-      <!-- SETUP CARD -->
-      <div class="card" id="setupCard">
-        <h2>🎄 Grown-ups: Set up your quest</h2>
-        <p class="hint">Use fun, simple places (no personal details needed): “Playroom”, “Backyard”, “Blue Street”, “Grandma’s House”</p>
+    <button onclick="goToSetup()">Begin the Quest</button>
+</div>
 
-        <label for="cityInput">Optional town or family name:</label>
-        <input id="cityInput" type="text" placeholder="e.g. Mukeriyan, Maple Lane, The Mehta Family" />
+<!-- ⭐ SETUP SCREEN -->
+<div id="setup" class="screen">
+    <h2>🎄 Grown-ups: Enter 4 Places</h2>
+    <p>Examples: Kitchen, Backyard, Living Room, Grandma’s House</p>
 
-        <label for="place1">Stop 1:</label>
-        <input id="place1" type="text" placeholder="Playroom" />
+    <input id="city" placeholder="City or Town (optional)" /><br>
+    <input id="loc1" placeholder="Location 1" /><br>
+    <input id="loc2" placeholder="Location 2" /><br>
+    <input id="loc3" placeholder="Location 3" /><br>
+    <input id="loc4" placeholder="Location 4" /><br>
 
-        <label for="place2">Stop 2:</label>
-        <input id="place2" type="text" placeholder="Backyard" />
+    <button onclick="startGame()">Start Puzzle Adventure</button>
+</div>
 
-        <label for="place3">Stop 3:</label>
-        <input id="place3" type="text" placeholder="Grandma’s House" />
+<!-- ⭐ GAME SCENE -->
+<div id="game" class="screen">
+    <div id="buddy">🧝‍♂️</div>
+    <h2 id="sceneTitle"></h2>
 
-        <label for="place4">Stop 4:</label>
-        <input id="place4" type="text" placeholder="Secret Street" />
+    <div class="clue-box" id="clueText"></div>
 
-        <div class="button-row">
-          <button class="primary" id="startBtn">✨ Start Santa’s Quest</button>
-          <button class="secondary" id="quickFillBtn">🎲 Surprise-fill Places</button>
-        </div>
-      </div>
+    <input id="answerBox" placeholder="Type your answer…" />
+    <button onclick="submitAnswer()">Submit</button>
 
-      <!-- GAME CARD -->
-      <div class="card" id="gameCard">
-        <div class="scene-header">
-          <div>
-            <div class="scene-badge">
-              Scene <span id="sceneNumber">1</span> of <span id="sceneTotal">5</span>
-            </div>
-          </div>
-          <div id="sceneTitle" style="font-size:0.85rem; opacity:0.9;"></div>
-        </div>
+    <div id="message"></div>
 
-        <div id="sceneDescription"></div>
-        <div id="taskText"></div>
+    <button id="nextBtn" style="display:none;" onclick="nextScene()">Next Scene</button>
+</div>
 
-        <canvas id="gameCanvas" width="800" height="450">
-          Your browser does not support the canvas element.
-        </canvas>
+<!-- ⭐ FINAL SCENE -->
+<div id="final" class="screen">
+    <h1>🎅✨ You Found Santa!</h1>
 
-        <div id="message"></div>
+    <p style="font-size:1.1rem; line-height:1.5rem;">
+        Santa saw your clever clues and jumped with joy!  
+        He and Buddy are now heading back to the North Pole —  
+        and they want to say **THANK YOU** for saving Christmas! 🎄❤️  
+    </p>
 
-        <div class="button-row">
-          <button class="secondary" id="restartBtn">🔄 Restart Quest</button>
-          <button class="primary" id="nextBtn">➡️ Next Stop</button>
-        </div>
+    <p style="font-size:3rem;">👋🎅</p>
 
-        <p class="footer-note">
-          Kids: tap or click on the picture to find Santa. He’s always hiding somewhere you can see!
-        </p>
-      </div>
-    </div>
-  </div>
+    <button onclick="restart()">Play Again</button>
+</div>
 
-  <script>
-    // ----- State -----
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+<script>
+/* -------------------
+   STATE MANAGEMENT
+-------------------- */
+let currentScene = 1;
+let locations = [];
+let cityName = "";
+let correctAnswers = [];
+let hintTimer = null;
 
-    const sceneNumberEl = document.getElementById("sceneNumber");
-    const sceneTotalEl = document.getElementById("sceneTotal");
-    const sceneTitleEl = document.getElementById("sceneTitle");
-    const sceneDescriptionEl = document.getElementById("sceneDescription");
-    const taskTextEl = document.getElementById("taskText");
-    const messageEl = document.getElementById("message");
+/* -------------------
+   RHYMING CLUE BUILDER
+-------------------- */
+function buildClue(location) {
+    return (
+        `Buddy found a clue, oh what a sight!<br>` +
+        `It softly glows in the Christmas night.<br><br>` +
+        `It reads:<br>` +
+        `“I’m hiding near the **${location}**, you see…<br>` +
+        `Guess the place and come find me!”`
+    );
+}
 
-    const startBtn = document.getElementById("startBtn");
-    const quickFillBtn = document.getElementById("quickFillBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const restartBtn = document.getElementById("restartBtn");
-
-    const cityInput = document.getElementById("cityInput");
-    const placeInputs = [
-      document.getElementById("place1"),
-      document.getElementById("place2"),
-      document.getElementById("place3"),
-      document.getElementById("place4")
+/* -------------------
+   DEFAULT LOCATIONS
+-------------------- */
+function fillDefaultLocations() {
+    return [
+        "Kitchen",
+        "Backyard",
+        "Living Room",
+        "Front Porch"
     ];
+}
 
-    const totalScenes = 5;
-    sceneTotalEl.textContent = totalScenes.toString();
+/* -------------------
+   SCENE SWITCHING
+-------------------- */
+function show(screenId) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(screenId).classList.add("active");
+}
 
-    let cityName = "";
-    let places = [];
-    let currentScene = 1; // 1..5
-    let santaPos = { x: 0, y: 0 };
-    let santaFound = false;
+function goToSetup() { show("setup"); }
 
-    const defaultPlaces = [
-      "Playroom",
-      "Backyard",
-      "Grandma’s House",
-      "Secret Snowy Street",
-    ];
+/* -------------------
+   START GAME
+-------------------- */
+function startGame() {
+    cityName = document.getElementById("city").value.trim();
 
-    const miniTasks = [
-      "Before you tap, do a big high-five with someone near you! 🖐️",
-      "Take a deep breath and shout ‘Merry Christmas!’ softly. 🎄",
-      "Give someone next to you a quick smile. 😊",
-      "Wiggle your fingers like magic reindeer sparkles. ✨",
-    ];
+    const l1 = document.getElementById("loc1").value.trim();
+    const l2 = document.getElementById("loc2").value.trim();
+    const l3 = document.getElementById("loc3").value.trim();
+    const l4 = document.getElementById("loc4").value.trim();
 
-    // ----- Helpers -----
-    function randomInRange(min, max) {
-      return Math.random() * (max - min) + min;
+    locations = [l1, l2, l3, l4];
+
+    // fill blanks with defaults
+    const defaults = fillDefaultLocations();
+    for (let i = 0; i < 4; i++) {
+        if (!locations[i]) locations[i] = defaults[i];
     }
 
-    function setMessage(text, type = "") {
-      messageEl.className = "";
-      if (type) messageEl.classList.add(type);
-      messageEl.textContent = text;
+    correctAnswers = locations.map(l => l.toLowerCase());
+
+    currentScene = 1;
+    loadScene();
+    show("game");
+}
+
+/* -------------------
+   LOAD A SCENE
+-------------------- */
+function loadScene() {
+    if (currentScene > 4) {
+        show("final");
+        return;
     }
 
-    function getPlaceName(sceneIndex) {
-      // sceneIndex: 1..4 (because 5 is sky)
-      return places[sceneIndex - 1] || defaultPlaces[sceneIndex - 1];
+    const loc = locations[currentScene - 1];
+
+    document.getElementById("sceneTitle").innerHTML =
+        `Scene ${currentScene} — Searching in ${cityName || "your town"}!`;
+
+    document.getElementById("clueText").innerHTML = buildClue(loc);
+
+    document.getElementById("message").innerHTML = "";
+    document.getElementById("answerBox").value = "";
+    document.getElementById("nextBtn").style.display = "none";
+
+    startHintTimer(loc);
+}
+
+/* -------------------
+   HINT TIMER (5 minutes)
+-------------------- */
+function startHintTimer(location) {
+    if (hintTimer) clearTimeout(hintTimer);
+
+    hintTimer = setTimeout(() => {
+        document.getElementById("message").innerHTML =
+            `🧝‍♂️ Buddy Hint: “Think carefully… where might Santa rest?<br>` +
+            `Try looking near the <b>${location}</b>!”`;
+    }, 5 * 60 * 1000); // 5 minutes
+}
+
+/* -------------------
+   SUBMIT ANSWER
+-------------------- */
+function submitAnswer() {
+    const user = document.getElementById("answerBox").value.trim().toLowerCase();
+    const correct = correctAnswers[currentScene - 1];
+
+    if (user === correct) {
+        document.getElementById("message").innerHTML =
+            `🎉 Correct! Santa WAS hiding near the <b>${locations[currentScene - 1]}</b>!`;
+        document.getElementById("nextBtn").style.display = "inline-block";
+        clearTimeout(hintTimer);
+    } else {
+        document.getElementById("message").innerHTML =
+            `❌ Not quite! Try again, detective!`;
     }
+}
 
-    function buildSceneText(sceneIndex) {
-      const place = getPlaceName(sceneIndex);
-      const town = cityName || "your town";
+/* -------------------
+   NEXT SCENE
+-------------------- */
+function nextScene() {
+    currentScene++;
+    loadScene();
+}
 
-      switch (sceneIndex) {
-        case 1:
-          sceneTitleEl.textContent = place;
-          sceneDescriptionEl.textContent =
-            `Santa’s first clue leads to “${place}” in ${town}. ` +
-            `Someone saw a flash of red and heard tiny bells…`;
-          taskTextEl.textContent = miniTasks[0];
-          break;
-        case 2:
-          sceneTitleEl.textContent = place;
-          sceneDescriptionEl.textContent =
-            `Now Santa might be sneaking around “${place}”. ` +
-            `An elf dropped a candy cane here—can you spot him?`;
-          taskTextEl.textContent = miniTasks[1];
-          break;
-        case 3:
-          sceneTitleEl.textContent = place;
-          sceneDescriptionEl.textContent =
-            `A shimmering trail of glitter was seen near “${place}”. ` +
-            `Santa can’t be far away…`;
-          taskTextEl.textContent = miniTasks[2];
-          break;
-        case 4:
-          sceneTitleEl.textContent = place;
-          sceneDescriptionEl.textContent =
-            `Whispers say Santa was laughing near “${place}”. ` +
-            `This might be his last hiding spot on the ground!`;
-          taskTextEl.textContent = miniTasks[3];
-          break;
-        case 5:
-          sceneTitleEl.textContent = "Night Sky";
-          sceneDescriptionEl.textContent =
-            `You found all of Santa’s stopping points! ` +
-            `Look up… he’s flying over ${town} right now.`;
-          taskTextEl.textContent = "Tap the sky to see Santa’s sleigh appear! 🛷";
-          break;
-      }
-    }
+/* -------------------
+   RESTART
+-------------------- */
+function restart() {
+    show("scene0");
+}
+</script>
 
-    // ----- Drawing -----
-    function drawBackground(sceneIndex) {
-      const w = canvas.width;
-      const h = canvas.height;
-
-      // Clear
-      ctx.clearRect(0, 0, w, h);
-
-      if (sceneIndex < 5) {
-        // generic land scene
-        const grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, "#06172f");
-        grad.addColorStop(0.5, "#092951");
-        grad.addColorStop(1, "#06361b");
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, w, h);
-
-        // “ground”
-        ctx.fillStyle = "#0a4a24";
-        ctx.fillRect(0, h * 0.6, w, h * 0.4);
-
-        // houses/trees shapes
-        ctx.fillStyle = "#0f1939";
-        for (let i = 0; i < 5; i++) {
-          const bw = 60;
-          const bh = randomInRange(80, 130);
-          const bx = i * (w / 5) + randomInRange(-20, 20);
-          const by = h * 0.6 - bh;
-          ctx.fillRect(bx, by, bw, bh);
-        }
-
-        // some stars
-        ctx.fillStyle = "#ffffff";
-        for (let i = 0; i < 30; i++) {
-          const sx = Math.random() * w;
-          const sy = Math.random() * (h * 0.4);
-          ctx.fillRect(sx, sy, 2, 2);
-        }
-      } else {
-        // night sky for scene 5
-        const gradSky = ctx.createLinearGradient(0, 0, 0, h);
-        gradSky.addColorStop(0, "#04081c");
-        gradSky.addColorStop(0.5, "#070b30");
-        gradSky.addColorStop(1, "#020515");
-        ctx.fillStyle = gradSky;
-        ctx.fillRect(0, 0, w, h);
-
-        // more stars
-        ctx.fillStyle = "#ffffff";
-        for (let i = 0; i < 80; i++) {
-          const sx = Math.random() * w;
-          const sy = Math.random() * h;
-          ctx.fillRect(sx, sy, 2, 2);
-        }
-
-        // faint town silhouette
-        ctx.fillStyle = "#050a1a";
-        ctx.fillRect(0, h * 0.7, w, h * 0.3);
-      }
-    }
-
-    function placeSanta(sceneIndex) {
-      const w = canvas.width;
-      const h = canvas.height;
-      santaFound = false;
-
-      if (sceneIndex < 5) {
-        // place Santa somewhere above the “ground” but visible
-        const margin = 60;
-        const minY = h * 0.35;
-        const maxY = h * 0.6 - 30;
-
-        santaPos.x = randomInRange(margin, w - margin);
-        santaPos.y = randomInRange(minY, maxY);
-      } else {
-        // Santa sleigh near top-right for scene 5
-        santaPos.x = w * 0.7;
-        santaPos.y = h * 0.25;
-      }
-    }
-
-    function drawSanta(sceneIndex) {
-      ctx.save();
-      ctx.font = sceneIndex === 5 ? "72px serif" : "64px serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-
-      const emoji = sceneIndex === 5 ? "🛷🎅" : "🎅";
-      ctx.fillText(emoji, santaPos.x, santaPos.y);
-      ctx.restore();
-    }
-
-    function renderScene() {
-      sceneNumberEl.textContent = currentScene.toString();
-      buildSceneText(currentScene);
-      setMessage("", "");
-      drawBackground(currentScene);
-      placeSanta(currentScene);
-
-      if (currentScene === 5) {
-        // initially, do NOT show Santa in the sky until the tap
-      } else {
-        // For ground scenes, Santa is hidden until correct click
-      }
-    }
-
-    // ----- Game Flow -----
-    function setupPlacesFromInputs() {
-      const collected = placeInputs.map((input, i) =>
-        input.value.trim() || defaultPlaces[i]
-      );
-      places = collected;
-    }
-
-    function startGame() {
-      cityName = cityInput.value.trim() || "";
-      setupPlacesFromInputs();
-      currentScene = 1;
-      renderScene();
-    }
-
-    function goToNextScene() {
-      if (currentScene < totalScenes) {
-        currentScene++;
-        renderScene();
-      } else {
-        // end of game -> restart
-        startGame();
-      }
-    }
-
-    // ----- Click Handling -----
-    canvas.addEventListener("click", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const clickY = e.clientY - rect.top;
-
-      if (currentScene < 5) {
-        if (santaFound) {
-          setMessage("You already found Santa here! Tap ‘Next Stop’ 🎄", "good");
-          return;
-        }
-        const dx = clickX - santaPos.x;
-        const dy = clickY - santaPos.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < 60) {
-          santaFound = true;
-          drawBackground(currentScene);
-          // redraw Santa clearly
-          drawSanta(currentScene);
-          setMessage("You found Santa! Tap ‘Next Stop’ to follow him. 🎅✨", "good");
-        } else {
-          setMessage("Not there… try another spot! 👀", "hint");
-        }
-      } else {
-        // scene 5: reveal Santa sleigh on any tap
-        drawBackground(currentScene);
-        drawSanta(currentScene);
-        setMessage("Look! Santa is flying across the sky! 🌌🎅", "good");
-      }
-    });
-
-    // ----- Buttons -----
-    startBtn.addEventListener("click", () => {
-      startGame();
-    });
-
-    restartBtn.addEventListener("click", () => {
-      startGame();
-    });
-
-    nextBtn.addEventListener("click", () => {
-      goToNextScene();
-    });
-
-    quickFillBtn.addEventListener("click", () => {
-      // auto-fill with fun examples
-      const samples = [
-        ["Playroom", "Backyard", "Grandma’s House", "Secret Street"],
-        ["Toy Corner", "Star Park", "Cocoa Kitchen", "Rainbow Road"],
-        ["Elf Alley", "Candy Lane", "Snowy Steps", "Bell Tower Corner"],
-      ];
-      const pick = samples[Math.floor(Math.random() * samples.length)];
-      placeInputs.forEach((input, i) => {
-        input.value = pick[i];
-      });
-    });
-
-    // initial render of scene layout
-    renderScene();
-  </script>
 </body>
 </html>
